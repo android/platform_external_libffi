@@ -7,6 +7,7 @@
 # source files for the OS and architecture.
 
 ifneq ($(TARGET_ARCH),arm)
+ifneq ($(TARGET_ARCH),sh)
 
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
@@ -37,4 +38,5 @@ include $(BUILD_SHARED_LIBRARY)
 
 include external/libffi/testsuite/Android.mk
 
+endif
 endif
