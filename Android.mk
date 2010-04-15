@@ -24,6 +24,9 @@ endif
 ifeq ($(TARGET_OS)-$(TARGET_ARCH),linux-x86)
   LOCAL_SRC_FILES += src/x86/ffi.c src/x86/sysv.S
 endif
+ifeq ($(TARGET_OS)-$(TARGET_ARCH),linux-sh)
+  LOCAL_SRC_FILES += src/sh/ffi.c src/sh/sysv.S
+endif
 
 ifeq ($(LOCAL_SRC_FILES),)
   LOCAL_SRC_FILES := your-architecture-not-supported-by-ffi-makefile.c
