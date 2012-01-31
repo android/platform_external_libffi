@@ -38,6 +38,10 @@ ifeq ($(ffi_os)-$(ffi_arch),darwin-x86)
   LOCAL_SRC_FILES := src/x86/ffi.c src/x86/darwin.S
 endif
 
+ifeq ($(ffi_os)-$(ffi_arch),linux-mips)
+  LOCAL_SRC_FILES += src/mips/ffi.c src/mips/o32.S
+endif
+
 ifeq ($(LOCAL_SRC_FILES),)
   $(info The os/architecture $(ffi_os)-$(ffi_arch) is not supported by libffi.)
   LOCAL_SRC_FILES := your-architecture-not-supported-by-ffi-makefile.c
