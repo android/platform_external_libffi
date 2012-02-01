@@ -35,6 +35,7 @@ ifneq ($(TARGET_ARCH),arm)
        # This include just keeps the nesting a bit saner.
        include $(LOCAL_PATH)/Libffi.mk
 
+       LOCAL_MODULE_TAGS := optional
        LOCAL_MODULE := libffi
 
        include $(BUILD_SHARED_LIBRARY)
