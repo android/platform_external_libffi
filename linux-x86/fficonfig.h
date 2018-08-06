@@ -12,7 +12,7 @@
 #define EH_FRAME_FLAGS "aw"
 
 /* Define this if you want extra debugging. */
-#define FFI_DEBUG 1
+#undef FFI_DEBUG
 
 /* Define this is you do not want support for the raw API. */
 #undef FFI_NO_RAW_API
@@ -134,7 +134,7 @@
 
 /* Define this if you are using Purify and want to suppress spurious messages.
    */
-#define USING_PURIFY 1
+#undef USING_PURIFY
 
 /* Version number of package */
 #undef VERSION

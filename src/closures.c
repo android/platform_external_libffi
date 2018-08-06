@@ -1,6 +1,7 @@
 /* -----------------------------------------------------------------------
-   closures.c - Copyright (c) 2007  Red Hat, Inc.
-   Copyright (C) 2007 Free Software Foundation, Inc
+   closures.c - Copyright (c) 2007, 2009, 2010  Red Hat, Inc.
+                Copyright (C) 2007, 2009, 2010 Free Software Foundation, Inc
+                Copyright (c) 2011 Plausible Labs Cooperative, Inc.
 
    Code to allocate and deallocate memory for closures.
 
@@ -32,8 +33,8 @@
 #include <ffi.h>
 #include <ffi_common.h>
 
-#ifndef FFI_MMAP_EXEC_WRIT
-# if __gnu_linux__
+#if !FFI_MMAP_EXEC_WRIT && !FFI_EXEC_TRAMPOLINE_TABLE
+# if __gnu_linux__ && !defined(__ANDROID__)
 /* This macro indicates it may be forbidden to map anonymous memory
    with both write and execute permission.  Code compiled when this
    option is defined will attempt to map such pages once, but if it
@@ -41,6 +42,13 @@
    executable filesystem and mapping pages from it into separate
    locations in the virtual memory space, one location writable and
    another executable.  */
+#  define FFI_MMAP_EXEC_WRIT 1
+#  define HAVE_MNTENT 1
+# endif
+# if defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)
+/* Windows systems may have Data Execution Protection (DEP) enabled, 
+   which requires the use of VirtualMalloc/VirtualFree to alloc/free
+   executable memory. */
 #  define FFI_MMAP_EXEC_WRIT 1
 # endif
 #endif
@@ -56,11 +64,19 @@
 
 #if FFI_CLOSURES
 
-# if FFI_MMAP_EXEC_WRIT
+# if FFI_EXEC_TRAMPOLINE_TABLE
+
+// Per-target implementation; It's unclear what can reasonable be shared between two OS/architecture implementations.
+
+# elif FFI_MMAP_EXEC_WRIT /* !FFI_EXEC_TRAMPOLINE_TABLE */
 
 #define USE_LOCKS 1
 #define USE_DL_PREFIX 1
+#ifdef __GNUC__
+#ifndef USE_BUILTIN_FFS
 #define USE_BUILTIN_FFS 1
+#endif
+#endif
 
 /* We need to use mmap, not sbrk.  */
 #define HAVE_MORECORE 0
@@ -90,10 +106,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 #include <string.h>
 #include <stdio.h>
+#if !defined(X86_WIN32) && !defined(X86_WIN64)
+#ifdef HAVE_MNTENT
 #include <mntent.h>
+#endif /* HAVE_MNTENT */
 #include <sys/param.h>
 #include <pthread.h>
 
@@ -130,7 +151,7 @@ selinux_enabled_check (void)
       p = strchr (p + 1, ' ');
       if (p == NULL)
         break;
-      if (strncmp (p + 1, "selinuxfs ", 10) != 0)
+      if (strncmp (p + 1, "selinuxfs ", 10) == 0)
         {
           free (buf);
           fclose (f);
@@ -149,7 +170,55 @@ selinux_enabled_check (void)
 
 #define is_selinux_enabled() 0
 
-#endif
+#endif /* !FFI_MMAP_EXEC_SELINUX */
+
+/* On PaX enable kernels that have MPROTECT enable we can't use PROT_EXEC. */
+#ifdef FFI_MMAP_EXEC_EMUTRAMP_PAX
+#include <stdlib.h>
+
+static int emutramp_enabled = -1;
+
+static int
+emutramp_enabled_check (void)
+{
+  char *buf = NULL;
+  size_t len = 0;
+  FILE *f;
+  int ret;
+  f = fopen ("/proc/self/status", "r");
+  if (f == NULL)
+    return 0;
+  ret = 0;
+
+  while (getline (&buf, &len, f) != -1)
+    if (!strncmp (buf, "PaX:", 4))
+      {
+        char emutramp;
+        if (sscanf (buf, "%*s %*c%c", &emutramp) == 1)
+          ret = (emutramp == 'E');
+        break;
+      }
+  free (buf);
+  fclose (f);
+  return ret;
+}
+
+#define is_emutramp_enabled() (emutramp_enabled >= 0 ? emutramp_enabled \
+                               : (emutramp_enabled = emutramp_enabled_check ()))
+#endif /* FFI_MMAP_EXEC_EMUTRAMP_PAX */
+
+#elif defined (__CYGWIN__) || defined(__INTERIX)
+
+#include <sys/mman.h>
+
+/* Cygwin is Linux-like, but not quite that Linux-like.  */
+#define is_selinux_enabled() 0
+
+#endif /* !defined(X86_WIN32) && !defined(X86_WIN64) */
+
+#ifndef FFI_MMAP_EXEC_EMUTRAMP_PAX
+#define is_emutramp_enabled() 0
+#endif /* FFI_MMAP_EXEC_EMUTRAMP_PAX */
 
 /* Declare all functions defined in dlmalloc.c as static.  */
 static void *dlmalloc(size_t);
@@ -168,9 +237,11 @@ static int dlmalloc_trim(size_t) MAYBE_UNUSED;
 static size_t dlmalloc_usable_size(void*) MAYBE_UNUSED;
 static void dlmalloc_stats(void) MAYBE_UNUSED;
 
+#if !(defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)) || defined (__CYGWIN__) || defined(__INTERIX)
 /* Use these for mmap and munmap within dlmalloc.c.  */
 static void *dlmmap(void *, size_t, int, int, int, off_t);
 static int dlmunmap(void *, size_t);
+#endif /* !(defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)) || defined (__CYGWIN__) || defined(__INTERIX) */
 
 #define mmap dlmmap
 #define munmap dlmunmap
@@ -179,6 +250,8 @@ static int dlmunmap(void *, size_t);
 
 #undef mmap
 #undef munmap
+
+#if !(defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)) || defined (__CYGWIN__) || defined(__INTERIX)
 
 /* A mutex used to synchronize access to *exec* variables in this file.  */
 static pthread_mutex_t open_temp_exec_file_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -192,9 +265,15 @@ static size_t execsize = 0;
 
 /* Open a temporary file name, and immediately unlink it.  */
 static int
-open_temp_exec_file_name (char *name)
+open_temp_exec_file_name (char *name, int flags)
 {
-  int fd = mkstemp (name);
+  int fd;
+
+#ifdef HAVE_MKOSTEMP
+  fd = mkostemp (name, flags);
+#else
+  fd = mkstemp (name);
+#endif
 
   if (fd != -1)
     unlink (name);
@@ -207,8 +286,30 @@ static int
 open_temp_exec_file_dir (const char *dir)
 {
   static const char suffix[] = "/ffiXXXXXX";
-  int lendir = strlen (dir);
-  char *tempname = __builtin_alloca (lendir + sizeof (suffix));
+  int lendir, flags;
+  char *tempname;
+#ifdef O_TMPFILE
+  int fd;
+#endif
+
+#ifdef O_CLOEXEC
+  flags = O_CLOEXEC;
+#else
+  flags = 0;
+#endif
+
+#ifdef O_TMPFILE
+  fd = open (dir, flags | O_RDWR | O_EXCL | O_TMPFILE, 0700);
+  /* If the running system does not support the O_TMPFILE flag then retry without it. */
+  if (fd != -1 || (errno != EINVAL && errno != EISDIR && errno != EOPNOTSUPP)) {
+    return fd;
+  } else {
+    errno = 0;
+  }
+#endif
+
+  lendir = strlen (dir);
+  tempname = __builtin_alloca (lendir + sizeof (suffix));
 
   if (!tempname)
     return -1;
@@ -216,7 +317,7 @@ open_temp_exec_file_dir (const char *dir)
   memcpy (tempname, dir, lendir);
   memcpy (tempname + lendir, suffix, sizeof (suffix));
 
-  return open_temp_exec_file_name (tempname);
+  return open_temp_exec_file_name (tempname, flags);
 }
 
 /* Open a temporary file in the directory in the named environment
@@ -232,6 +333,7 @@ open_temp_exec_file_env (const char *envvar)
   return open_temp_exec_file_dir (value);
 }
 
+#ifdef HAVE_MNTENT
 /* Open a temporary file in an executable and writable mount point
    listed in the mounts file.  Subsequent calls with the same mounts
    keep searching for mount points in the same file.  Providing NULL
@@ -264,7 +366,7 @@ open_temp_exec_file_mnt (const char *mounts)
       struct mntent mnt;
       char buf[MAXPATHLEN * 3];
 
-      if (getmntent_r (last_mntent, &mnt, buf, sizeof (buf)))
+      if (getmntent_r (last_mntent, &mnt, buf, sizeof (buf)) == NULL)
 	return -1;
 
       if (hasmntopt (&mnt, "ro")
@@ -278,6 +380,7 @@ open_temp_exec_file_mnt (const char *mounts)
 	return fd;
     }
 }
+#endif /* HAVE_MNTENT */
 
 /* Instructions to look for a location to hold a temporary file that
    can be mapped in for execution.  */
@@ -292,8 +395,10 @@ static struct
   { open_temp_exec_file_dir, "/var/tmp", 0 },
   { open_temp_exec_file_dir, "/dev/shm", 0 },
   { open_temp_exec_file_env, "HOME", 0 },
+#ifdef HAVE_MNTENT
   { open_temp_exec_file_mnt, "/etc/mtab", 1 },
   { open_temp_exec_file_mnt, "/proc/mounts", 1 },
+#endif /* HAVE_MNTENT */
 };
 
 /* Current index into open_temp_exec_file_opts.  */
@@ -321,7 +426,7 @@ open_temp_exec_file_opts_next (void)
 }
 
 /* Return a file descriptor of a temporary zero-sized file in a
-   writable and exexutable filesystem.  */
+   writable and executable filesystem.  */
 static int
 open_temp_exec_file (void)
 {
@@ -420,6 +525,12 @@ dlmmap (void *start, size_t length, int prot,
   printf ("mapping in %zi\n", length);
 #endif
 
+  if (execfd == -1 && is_emutramp_enabled ())
+    {
+      ptr = mmap (start, length, prot & ~PROT_EXEC, flags, fd, offset);
+      return ptr;
+    }
+
   if (execfd == -1 && !is_selinux_enabled ())
     {
       ptr = mmap (start, length, prot | PROT_EXEC, flags, fd, offset);
@@ -488,6 +599,8 @@ segment_holding_code (mstate m, char* addr)
   }
 }
 #endif
+
+#endif /* !(defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)) || defined (__CYGWIN__) || defined(__INTERIX) */
 
 /* Allocate a chunk of memory with the given size.  Returns a pointer
    to the writable address, and sets *CODE to the executable
