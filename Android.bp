@@ -36,6 +36,7 @@ cc_library_static {
     generated_headers: ["ffi_header"],
     export_generated_headers: ["ffi_header"],
     srcs: [
+        "src/closures.c",
         "src/debug.c",
         "src/java_raw_api.c",
         "src/prep_cif.c",
@@ -79,6 +80,15 @@ cc_library_static {
                 "-DHAVE_AS_ASCII_PSEUDO_OP",
             ],
             export_include_dirs: ["linux-x86_64"],
+        },
+    },
+    target: {
+        darwin_x86_64: {
+            exclude_srcs: ["src/x86/unix64.S"],
+            srcs: [
+                "src/x86/darwin.S",
+                "src/x86/darwin64.S",
+            ],
         },
     },
 }
