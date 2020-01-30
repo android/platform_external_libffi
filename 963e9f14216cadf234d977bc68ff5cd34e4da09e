@@ -1,0 +1,11 @@
+Code-Review+2: Jorge Moreira Broche <jemoreira@google.com>
+Code-Review+2: Cody Schuffelen <schuffelen@google.com>
+Autosubmit+1: Jorge Moreira Broche <jemoreira@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+DrNo-Review+1: Hung-ying Tyan <tyanh@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Thu, 30 Jan 2020 16:27:24 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/libffi/+/1220961
+Project: platform/external/libffi
+Branch: refs/heads/android10-gsi
