@@ -1,0 +1,15 @@
+name: "libffi"
+description: "A portable foreign-function interface library."
+third_party {
+  url {
+    type: GIT
+    value: "https://github.com/libffi/libffi.git"
+  }
+  version: "v3.3"
+  license_type: NOTICE
+  last_upgrade_date {
+    year: 2020
+    month: 3
+    day: 26
+  }
+}

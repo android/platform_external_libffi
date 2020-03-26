@@ -27,8 +27,12 @@ cc_library_static {
     cflags: [
         "-Wall",
         "-Werror",
+
         "-Wno-error=incompatible-pointer-types",
         "-Wno-incompatible-pointer-types",
+
+        "-Wno-deprecated-declarations",
+        "-Wno-missing-field-initializers",
         "-Wno-null-pointer-arithmetic",
         "-Wno-pointer-arith",
         "-Wno-sign-compare",
