@@ -101,6 +101,7 @@ void ffi_prep_args (char *stack, extended_cif *ecif)
 
       /* Align argp as appropriate for the argument type.  */
       if ((alignment - 1) & (unsigned) argp)
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 	argp = (char *) ALIGN (argp, alignment);
 
       /* Copy the argument, promoting integral types smaller than a
@@ -231,6 +232,138 @@ ffi_closure_helper (unsigned char *args,
       /* Align argp as appropriate for the argument type.  */
       if ((alignment - 1) & (unsigned) argp)
 	argp = (char *) ALIGN (argp, alignment);
+=======
+	argp = (char *) FFI_ALIGN (argp, alignment);
+
+      /* Copy the argument, promoting integral types smaller than a
+	 word to word size.  */
+      if (size < sizeof (int))
+	{
+	  size = sizeof (int);
+	  switch (atype->type)
+	    {
+	    case FFI_TYPE_SINT8:
+	      *(signed int *) argp = (signed int) *(SINT8 *) avalue;
+	      break;
+		  
+	    case FFI_TYPE_UINT8:
+	      *(unsigned int *) argp = (unsigned int) *(UINT8 *) avalue;
+	      break;
+		  
+	    case FFI_TYPE_SINT16:
+	      *(signed int *) argp = (signed int) *(SINT16 *) avalue;
+	      break;
+		  
+	    case FFI_TYPE_UINT16:
+	      *(unsigned int *) argp = (unsigned int) *(UINT16 *) avalue;
+	      break;
+
+	    case FFI_TYPE_STRUCT:
+	      memcpy (argp, avalue, atype->size);
+	      break;
+
+	    default:
+	      FFI_ASSERT(0);
+	    }
+	}
+      else if (size == sizeof (int))
+	*(unsigned int *) argp = (unsigned int) *(UINT32 *) avalue;
+      else
+	memcpy (argp, avalue, size);
+      argp += size;
+    }
+}
+
+
+/* Call FN using the prepared CIF.  RVALUE points to space allocated by
+   the caller for the return value, and AVALUE is an array of argument
+   pointers.  */
+
+void ffi_call (ffi_cif *cif, void (*fn) (void), void *rvalue, void **avalue)
+{
+
+  extended_cif ecif;
+  UINT64 result;
+
+  /* If bigret is true, this is the case where a return value of larger
+     than 8 bytes is handled by being passed by reference as an implicit
+     argument.  */
+  int bigret = (cif->rtype->type == FFI_TYPE_STRUCT
+		&& cif->rtype->size > 8);
+
+  ecif.cif = cif;
+  ecif.avalue = avalue;
+
+  /* Allocate space for return value if this is the pass-by-reference case
+     and the caller did not provide a buffer.  */
+  if (rvalue == NULL && bigret)
+    ecif.rvalue = alloca (cif->rtype->size);
+  else
+    ecif.rvalue = rvalue;
+
+  result = ffi_call_sysv (ffi_prep_args, &ecif, cif->bytes, fn);
+
+  /* Now result contains the 64 bit contents returned from fn in
+     r2 and r3.  Copy the value of the appropriate size to the user-provided
+     rvalue buffer.  */
+  if (rvalue && !bigret)
+    switch (cif->rtype->size)
+      {
+      case 1:
+	*(UINT8 *)rvalue = (UINT8) result;
+	break;
+      case 2:
+	*(UINT16 *)rvalue = (UINT16) result;
+	break;
+      case 4:
+	*(UINT32 *)rvalue = (UINT32) result;
+	break;
+      case 8:
+	*(UINT64 *)rvalue = (UINT64) result;
+	break;
+      default:
+	memcpy (rvalue, (void *)&result, cif->rtype->size);
+	break;
+      }
+}
+
+/* This function is invoked from the closure trampoline to invoke
+   CLOSURE with argument block ARGS.  Parse ARGS according to
+   CLOSURE->cfi and invoke CLOSURE->fun.  */
+
+static UINT64
+ffi_closure_helper (unsigned char *args,
+		    ffi_closure *closure)
+{
+  ffi_cif *cif = closure->cif;
+  unsigned char *argp = args;
+  void **parsed_args = alloca (cif->nargs * sizeof (void *));
+  UINT64 result;
+  void *retptr;
+  unsigned int i;
+
+  /* First figure out what to do about the return type.  If this is the
+     big-structure-return case, the first arg is the hidden return buffer
+     allocated by the caller.  */
+  if (cif->rtype->type == FFI_TYPE_STRUCT
+      && cif->rtype->size > 8)
+    {
+      retptr = *((void **) argp);
+      argp += 4;
+    }
+  else
+    retptr = (void *) &result;
+
+  /* Fill in the array of argument pointers.  */
+  for (i = 0; i < cif->nargs; i++)
+    {
+      size_t size = cif->arg_types[i]->size;
+      size_t alignment = cif->arg_types[i]->alignment;
+
+      /* Align argp as appropriate for the argument type.  */
+      if ((alignment - 1) & (unsigned) argp)
+	argp = (char *) FFI_ALIGN (argp, alignment);
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 
       /* Arguments smaller than an int are promoted to int.  */
       if (size < sizeof (int))

@@ -114,6 +114,7 @@ ffi_java_raw_to_ptrarray (ffi_cif *cif, ffi_java_raw *raw, void **args)
 	default:
 	  *args = raw;
 	  raw +=
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 	    ALIGN ((*tp)->size, sizeof(ffi_java_raw)) / sizeof(ffi_java_raw);
 	}
     }
@@ -235,6 +236,129 @@ ffi_java_ptrarray_to_raw (ffi_cif *cif, void **args, ffi_java_raw *raw)
 	  memcpy ((void*) raw->data, (void*)*args, (*tp)->size);
 	  raw +=
 	    ALIGN ((*tp)->size, sizeof(ffi_java_raw)) / sizeof(ffi_java_raw);
+=======
+	    FFI_ALIGN ((*tp)->size, sizeof(ffi_java_raw)) / sizeof(ffi_java_raw);
+	}
+    }
+
+#else /* WORDS_BIGENDIAN */
+
+#if !PDP
+
+  /* then assume little endian */
+  for (i = 0; i < cif->nargs; i++, tp++, args++)
+    {
+#if FFI_SIZEOF_JAVA_RAW == 8
+      switch((*tp)->type) {
+	case FFI_TYPE_UINT64:
+	case FFI_TYPE_SINT64:
+	case FFI_TYPE_DOUBLE:
+	  *args = (void*) raw;
+	  raw += 2;
+	  break;
+	case FFI_TYPE_COMPLEX:
+	  /* Not supported yet.  */
+	  abort();
+	default:
+	  *args = (void*) raw++;
+      }
+#else /* FFI_SIZEOF_JAVA_RAW != 8 */
+	*args = (void*) raw;
+	raw +=
+	  FFI_ALIGN ((*tp)->size, sizeof(ffi_java_raw)) / sizeof(ffi_java_raw);
+#endif /* FFI_SIZEOF_JAVA_RAW == 8 */
+    }
+
+#else
+#error "pdp endian not supported"
+#endif /* ! PDP */
+
+#endif /* WORDS_BIGENDIAN */
+}
+
+void
+ffi_java_ptrarray_to_raw (ffi_cif *cif, void **args, ffi_java_raw *raw)
+{
+  unsigned i;
+  ffi_type **tp = cif->arg_types;
+
+  for (i = 0; i < cif->nargs; i++, tp++, args++)
+    {
+      switch ((*tp)->type)
+	{
+	case FFI_TYPE_UINT8:
+#if WORDS_BIGENDIAN
+	  *(UINT32*)(raw++) = *(UINT8*) (*args);
+#else
+	  (raw++)->uint = *(UINT8*) (*args);
+#endif
+	  break;
+
+	case FFI_TYPE_SINT8:
+#if WORDS_BIGENDIAN
+	  *(SINT32*)(raw++) = *(SINT8*) (*args);
+#else
+	  (raw++)->sint = *(SINT8*) (*args);
+#endif
+	  break;
+
+	case FFI_TYPE_UINT16:
+#if WORDS_BIGENDIAN
+	  *(UINT32*)(raw++) = *(UINT16*) (*args);
+#else
+	  (raw++)->uint = *(UINT16*) (*args);
+#endif
+	  break;
+
+	case FFI_TYPE_SINT16:
+#if WORDS_BIGENDIAN
+	  *(SINT32*)(raw++) = *(SINT16*) (*args);
+#else
+	  (raw++)->sint = *(SINT16*) (*args);
+#endif
+	  break;
+
+	case FFI_TYPE_UINT32:
+#if WORDS_BIGENDIAN
+	  *(UINT32*)(raw++) = *(UINT32*) (*args);
+#else
+	  (raw++)->uint = *(UINT32*) (*args);
+#endif
+	  break;
+
+	case FFI_TYPE_SINT32:
+#if WORDS_BIGENDIAN
+	  *(SINT32*)(raw++) = *(SINT32*) (*args);
+#else
+	  (raw++)->sint = *(SINT32*) (*args);
+#endif
+	  break;
+
+	case FFI_TYPE_FLOAT:
+	  (raw++)->flt = *(FLOAT32*) (*args);
+	  break;
+
+#if FFI_SIZEOF_JAVA_RAW == 8
+	case FFI_TYPE_UINT64:
+	case FFI_TYPE_SINT64:
+	case FFI_TYPE_DOUBLE:
+	  raw->uint = *(UINT64*) (*args);
+	  raw += 2;
+	  break;
+#endif
+
+	case FFI_TYPE_POINTER:
+	  (raw++)->ptr = **(void***) args;
+	  break;
+
+	default:
+#if FFI_SIZEOF_JAVA_RAW == 8
+	  FFI_ASSERT(0);	/* Should have covered all cases */
+#else
+	  memcpy ((void*) raw->data, (void*)*args, (*tp)->size);
+	  raw +=
+	    FFI_ALIGN ((*tp)->size, sizeof(ffi_java_raw)) / sizeof(ffi_java_raw);
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 #endif
 	}
     }

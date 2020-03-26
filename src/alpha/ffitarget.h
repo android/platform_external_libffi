@@ -44,9 +44,19 @@ typedef enum ffi_abi {
 } ffi_abi;
 #endif
 
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 /* ---- Definitions for closures ----------------------------------------- */
 
 #define FFI_CLOSURES 1
+=======
+#define FFI_TARGET_SPECIFIC_STACK_SPACE_ALLOCATION
+#define FFI_TARGET_HAS_COMPLEX_TYPE
+
+/* ---- Definitions for closures ----------------------------------------- */
+
+#define FFI_CLOSURES 1
+#define FFI_GO_CLOSURES 1
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 #define FFI_TRAMPOLINE_SIZE 24
 #define FFI_NATIVE_RAW_API 0
 

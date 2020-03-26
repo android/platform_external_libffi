@@ -59,7 +59,11 @@ ffi_call_EABI:
 	mov 	$r6, $r4 /* Save result buffer */
 	mov	$r7, $r5 /* Save the target fn */
 	mov	$r8, $r3 /* Save the flags */
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 	sub.l	$sp, $r2 /* Allocate stack space */
+=======
+	sub	$sp, $r2 /* Allocate stack space */
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 	mov	$r0, $sp /* We can stomp over $r0 */
 	/* $r1 is already set up */
 	jsra 	ffi_prep_args

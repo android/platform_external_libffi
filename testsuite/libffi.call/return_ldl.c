@@ -3,8 +3,13 @@
    Limitations:	none.
    PR:		none.
    Originator:	<andreast@gcc.gnu.org> 20071113  */
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 
 /* { dg-do run { xfail x86_64-*-mingw* x86_64-*-cygwin* } } */
+=======
+/* { dg-do run } */
+
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 #include "ffitest.h"
 
 static long double return_ldl(long double ldl)

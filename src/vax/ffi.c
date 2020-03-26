@@ -108,6 +108,7 @@ ffi_prep_args (extended_cif *ecif, void *stack)
 
 	  /* Align if necessary.  */
 	  if ((sizeof(int) - 1) & z)
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 	    z = ALIGN(z, sizeof(int));
 	}
 
@@ -216,6 +217,116 @@ ffi_prep_closure_elfbsd (ffi_cif *cif, void **avalue, char *stackp)
       /* Align if necessary */
       if ((sizeof (int) - 1) & z)
 	z = ALIGN(z, sizeof (int));
+=======
+	    z = FFI_ALIGN(z, sizeof(int));
+	}
+
+      p_argv++;
+      argp += z;
+    }
+
+  return struct_value_ptr;
+}
+
+ffi_status
+ffi_prep_cif_machdep (ffi_cif *cif)
+{
+  /* Set the return type flag */
+  switch (cif->rtype->type)
+    {
+    case FFI_TYPE_VOID:
+      cif->flags = 0;
+      break;
+
+    case FFI_TYPE_STRUCT:
+      if (cif->rtype->elements[0]->type == FFI_TYPE_STRUCT &&
+	  cif->rtype->elements[1])
+	{
+	  cif->flags = 0;
+	  break;
+	}
+
+      if (cif->rtype->size == sizeof (char))
+	cif->flags = CIF_FLAGS_CHAR;
+      else if (cif->rtype->size == sizeof (short))
+	cif->flags = CIF_FLAGS_SHORT;
+      else if (cif->rtype->size == sizeof (int))
+	cif->flags = CIF_FLAGS_INT;
+      else if (cif->rtype->size == 2 * sizeof (int))
+	cif->flags = CIF_FLAGS_DINT;
+      else
+	cif->flags = 0;
+      break;
+
+    default:
+      if (cif->rtype->size <= sizeof (int))
+	cif->flags = CIF_FLAGS_INT;
+      else
+	cif->flags = CIF_FLAGS_DINT;
+      break;
+    }
+
+  return FFI_OK;
+}
+
+void
+ffi_call (ffi_cif *cif, void (*fn) (), void *rvalue, void **avalue)
+{
+  extended_cif ecif;
+
+  ecif.cif = cif;
+  ecif.avalue = avalue;
+
+  /* If the return value is a struct and we don't have a return value
+     address then we need to make one.  */
+
+  if (rvalue == NULL
+      && cif->rtype->type == FFI_TYPE_STRUCT
+      && cif->flags == 0)
+    ecif.rvalue = alloca (cif->rtype->size);
+  else
+    ecif.rvalue = rvalue;
+
+  switch (cif->abi)
+    {
+    case FFI_ELFBSD:
+      ffi_call_elfbsd (&ecif, cif->bytes, cif->flags, ecif.rvalue, fn);
+      break;
+
+    default:
+      FFI_ASSERT (0);
+      break;
+    }
+}
+
+/*
+ * Closure API
+ */
+
+void ffi_closure_elfbsd (void);
+void ffi_closure_struct_elfbsd (void);
+unsigned int ffi_closure_elfbsd_inner (ffi_closure *, void *, char *);
+
+static void
+ffi_prep_closure_elfbsd (ffi_cif *cif, void **avalue, char *stackp)
+{
+  unsigned int i;
+  void **p_argv;
+  ffi_type **p_arg;
+
+  p_argv = avalue;
+
+  for (i = cif->nargs, p_arg = cif->arg_types; i != 0; i--, p_arg++)
+    {
+      size_t z;
+
+      z = (*p_arg)->size;
+      *p_argv = stackp;
+
+      /* Align if necessary */
+      if ((sizeof (int) - 1) & z)
+	z = FFI_ALIGN(z, sizeof (int));
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 
       p_argv++;
       stackp += z;

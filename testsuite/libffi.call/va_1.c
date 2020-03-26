@@ -5,7 +5,11 @@
    Originator:	        ARM Ltd. */
 
 /* { dg-do run } */
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 /* { dg-output "" { xfail avr32*-*-* } } */
+=======
+/* { dg-output "" { xfail avr32*-*-* m68k-*-* alpha-*-* } } */
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 
 #include "ffitest.h"
 #include <stdarg.h>

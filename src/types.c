@@ -38,6 +38,7 @@ struct struct_align_##name {			\
   char c;					\
   type x;					\
 };						\
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 maybe_const ffi_type ffi_type_##name = {	\
   sizeof(type),					\
   offsetof(struct struct_align_##name, x),	\
@@ -61,6 +62,33 @@ maybe_const ffi_type ffi_type_complex_##name = {	\
 
 /* Size and alignment are fake here. They must not be 0. */
 const ffi_type ffi_type_void = {
+=======
+FFI_EXTERN					\
+maybe_const ffi_type ffi_type_##name = {	\
+  sizeof(type),					\
+  offsetof(struct struct_align_##name, x),	\
+  id, NULL					\
+}
+
+#define FFI_COMPLEX_TYPEDEF(name, type, maybe_const)	\
+static ffi_type *ffi_elements_complex_##name [2] = {	\
+	(ffi_type *)(&ffi_type_##name), NULL		\
+};							\
+struct struct_align_complex_##name {			\
+  char c;						\
+  _Complex type x;					\
+};							\
+FFI_EXTERN						\
+maybe_const ffi_type ffi_type_complex_##name = {	\
+  sizeof(_Complex type),				\
+  offsetof(struct struct_align_complex_##name, x),	\
+  FFI_TYPE_COMPLEX,					\
+  (ffi_type **)ffi_elements_complex_##name		\
+}
+
+/* Size and alignment are fake here. They must not be 0. */
+FFI_EXTERN const ffi_type ffi_type_void = {
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
   1, 1, FFI_TYPE_VOID, NULL
 };
 

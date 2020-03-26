@@ -105,6 +105,7 @@ ffi_prep_args (void *stack, extended_cif *ecif)
 
 	  /* Align if necessary.  */
 	  if ((sizeof(int) - 1) & z)
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 	    z = ALIGN(z, sizeof(int));
 	}
 
@@ -298,6 +299,201 @@ ffi_prep_incoming_args_SYSV (char *stack, void **avalue, ffi_cif *cif)
 	  /* Align if necessary */
 	  if ((sizeof(int) - 1) & z)
 	    z = ALIGN(z, sizeof(int));
+=======
+	    z = FFI_ALIGN(z, sizeof(int));
+	}
+
+      p_argv++;
+      argp += z;
+    }
+
+  return struct_value_ptr;
+}
+
+#define CIF_FLAGS_INT		1
+#define CIF_FLAGS_DINT		2
+#define CIF_FLAGS_FLOAT		4
+#define CIF_FLAGS_DOUBLE	8
+#define CIF_FLAGS_LDOUBLE	16
+#define CIF_FLAGS_POINTER	32
+#define CIF_FLAGS_STRUCT1	64
+#define CIF_FLAGS_STRUCT2	128
+#define CIF_FLAGS_SINT8		256
+#define CIF_FLAGS_SINT16	512
+
+/* Perform machine dependent cif processing */
+ffi_status
+ffi_prep_cif_machdep (ffi_cif *cif)
+{
+  /* Set the return type flag */
+  switch (cif->rtype->type)
+    {
+    case FFI_TYPE_VOID:
+      cif->flags = 0;
+      break;
+
+    case FFI_TYPE_STRUCT:
+      if (cif->rtype->elements[0]->type == FFI_TYPE_STRUCT &&
+          cif->rtype->elements[1])
+        {
+          cif->flags = 0;
+          break;
+        }
+
+      switch (cif->rtype->size)
+	{
+	case 1:
+#ifdef __MINT__
+	  cif->flags = CIF_FLAGS_STRUCT2;
+#else
+	  cif->flags = CIF_FLAGS_STRUCT1;
+#endif
+	  break;
+	case 2:
+	  cif->flags = CIF_FLAGS_STRUCT2;
+	  break;
+#ifdef __MINT__
+	case 3:
+#endif
+	case 4:
+	  cif->flags = CIF_FLAGS_INT;
+	  break;
+#ifdef __MINT__
+	case 7:
+#endif
+	case 8:
+	  cif->flags = CIF_FLAGS_DINT;
+	  break;
+	default:
+	  cif->flags = 0;
+	  break;
+	}
+      break;
+
+    case FFI_TYPE_FLOAT:
+      cif->flags = CIF_FLAGS_FLOAT;
+      break;
+
+    case FFI_TYPE_DOUBLE:
+      cif->flags = CIF_FLAGS_DOUBLE;
+      break;
+
+#if (FFI_TYPE_LONGDOUBLE != FFI_TYPE_DOUBLE)
+    case FFI_TYPE_LONGDOUBLE:
+#ifdef __MINT__
+      cif->flags = 0;
+#else
+      cif->flags = CIF_FLAGS_LDOUBLE;
+#endif
+      break;
+#endif
+
+    case FFI_TYPE_POINTER:
+      cif->flags = CIF_FLAGS_POINTER;
+      break;
+
+    case FFI_TYPE_SINT64:
+    case FFI_TYPE_UINT64:
+      cif->flags = CIF_FLAGS_DINT;
+      break;
+
+    case FFI_TYPE_SINT16:
+      cif->flags = CIF_FLAGS_SINT16;
+      break;
+
+    case FFI_TYPE_SINT8:
+      cif->flags = CIF_FLAGS_SINT8;
+      break;
+
+    default:
+      cif->flags = CIF_FLAGS_INT;
+      break;
+    }
+
+  return FFI_OK;
+}
+
+void
+ffi_call (ffi_cif *cif, void (*fn) (), void *rvalue, void **avalue)
+{
+  extended_cif ecif;
+
+  ecif.cif = cif;
+  ecif.avalue = avalue;
+
+  /* If the return value is a struct and we don't have a return value
+     address then we need to make one.  */
+
+  if (rvalue == NULL
+      && cif->rtype->type == FFI_TYPE_STRUCT
+      && cif->rtype->size > 8)
+    ecif.rvalue = alloca (cif->rtype->size);
+  else
+    ecif.rvalue = rvalue;
+
+  switch (cif->abi)
+    {
+    case FFI_SYSV:
+      ffi_call_SYSV (&ecif, cif->bytes, cif->flags,
+		     ecif.rvalue, fn);
+      break;
+
+    default:
+      FFI_ASSERT (0);
+      break;
+    }
+}
+
+static void
+ffi_prep_incoming_args_SYSV (char *stack, void **avalue, ffi_cif *cif)
+{
+  unsigned int i;
+  void **p_argv;
+  char *argp;
+  ffi_type **p_arg;
+
+  argp = stack;
+  p_argv = avalue;
+
+  for (i = cif->nargs, p_arg = cif->arg_types; (i != 0); i--, p_arg++)
+    {
+      size_t z;
+
+      z = (*p_arg)->size;
+#ifdef __MINT__
+      if (cif->flags &&
+          cif->rtype->type == FFI_TYPE_STRUCT &&
+          (z == 1 || z == 2))
+ 	{
+	  *p_argv = (void *) (argp + 2);
+
+	  z = 4;
+	}
+      else
+      if (cif->flags &&
+          cif->rtype->type == FFI_TYPE_STRUCT &&
+          (z == 3 || z == 4))
+ 	{
+	  *p_argv = (void *) (argp);
+
+	  z = 4;
+	}
+      else
+#endif
+      if (z <= 4)
+	{
+	  *p_argv = (void *) (argp + 4 - z);
+
+	  z = 4;
+	}
+      else
+	{
+	  *p_argv = (void *) argp;
+
+	  /* Align if necessary */
+	  if ((sizeof(int) - 1) & z)
+	    z = FFI_ALIGN(z, sizeof(int));
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 	}
 
       p_argv++;

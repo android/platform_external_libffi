@@ -107,6 +107,7 @@ void *ffi_prep_args(char *stack, extended_cif *ecif)
       count += z;
     }
 
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
   return (stack + ((count > 24) ? 24 : ALIGN_DOWN(count, 8)));
 }
 
@@ -119,6 +120,20 @@ ffi_status ffi_prep_cif_machdep(ffi_cif *cif)
     cif->flags = cif->rtype->size;
 
   cif->bytes = ALIGN (cif->bytes, 8);
+=======
+  return (stack + ((count > 24) ? 24 : FFI_ALIGN_DOWN(count, 8)));
+}
+
+/* Perform machine dependent cif processing */
+ffi_status ffi_prep_cif_machdep(ffi_cif *cif)
+{
+  if (cif->rtype->type == FFI_TYPE_STRUCT)
+    cif->flags = -1;
+  else
+    cif->flags = cif->rtype->size;
+
+  cif->bytes = FFI_ALIGN (cif->bytes, 8);
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 
   return FFI_OK;
 }
