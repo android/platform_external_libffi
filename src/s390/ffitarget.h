@@ -58,6 +58,10 @@ typedef enum ffi_abi {
 /* ---- Definitions for closures ----------------------------------------- */
 
 #define FFI_CLOSURES 1
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
+=======
+#define FFI_GO_CLOSURES 1
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 #ifdef S390X
 #define FFI_TRAMPOLINE_SIZE 32
 #else

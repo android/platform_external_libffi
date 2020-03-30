@@ -93,6 +93,7 @@
 /* EALIGN is like ENTRY, but does alignment to 'words'*4 bytes
    past a 2^align boundary.  */
 #ifdef PROF
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 #define EALIGN(name, alignt, words)					      \
   ASM_GLOBAL_DIRECTIVE C_SYMBOL_NAME(name);				      \
   ASM_TYPE_DIRECTIVE (C_SYMBOL_NAME(name),@function)			      \
@@ -105,6 +106,20 @@
   0:
 #else /* PROF */
 #define EALIGN(name, alignt, words)					      \
+=======
+#define EFFI_ALIGN(name, alignt, words)					      \
+  ASM_GLOBAL_DIRECTIVE C_SYMBOL_NAME(name);				      \
+  ASM_TYPE_DIRECTIVE (C_SYMBOL_NAME(name),@function)			      \
+  .align ALIGNARG(2);							      \
+  C_LABEL(name)								      \
+  CALL_MCOUNT								      \
+  b 0f;									      \
+  .align ALIGNARG(alignt);						      \
+  EALIGN_W_##words;							      \
+  0:
+#else /* PROF */
+#define EFFI_ALIGN(name, alignt, words)					      \
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
   ASM_GLOBAL_DIRECTIVE C_SYMBOL_NAME(name);				      \
   ASM_TYPE_DIRECTIVE (C_SYMBOL_NAME(name),@function)			      \
   .align ALIGNARG(alignt);						      \

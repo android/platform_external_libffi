@@ -43,6 +43,7 @@ ffi_raw_size (ffi_cif *cif)
     {
 #if !FFI_NO_STRUCTS
       if ((*at)->type == FFI_TYPE_STRUCT)
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 	result += ALIGN (sizeof (void*), FFI_SIZEOF_ARG);
       else
 #endif
@@ -187,6 +188,152 @@ ffi_ptrarray_to_raw (ffi_cif *cif, void **args, ffi_raw *raw)
 	default:
 	  memcpy ((void*) raw->data, (void*)*args, (*tp)->size);
 	  raw += ALIGN ((*tp)->size, FFI_SIZEOF_ARG) / FFI_SIZEOF_ARG;
+=======
+	result += FFI_ALIGN (sizeof (void*), FFI_SIZEOF_ARG);
+      else
+#endif
+	result += FFI_ALIGN ((*at)->size, FFI_SIZEOF_ARG);
+    }
+
+  return result;
+}
+
+
+void
+ffi_raw_to_ptrarray (ffi_cif *cif, ffi_raw *raw, void **args)
+{
+  unsigned i;
+  ffi_type **tp = cif->arg_types;
+
+#if WORDS_BIGENDIAN
+
+  for (i = 0; i < cif->nargs; i++, tp++, args++)
+    {	  
+      switch ((*tp)->type)
+	{
+	case FFI_TYPE_UINT8:
+	case FFI_TYPE_SINT8:
+	  *args = (void*) ((char*)(raw++) + FFI_SIZEOF_ARG - 1);
+	  break;
+	  
+	case FFI_TYPE_UINT16:
+	case FFI_TYPE_SINT16:
+	  *args = (void*) ((char*)(raw++) + FFI_SIZEOF_ARG - 2);
+	  break;
+
+#if FFI_SIZEOF_ARG >= 4	  
+	case FFI_TYPE_UINT32:
+	case FFI_TYPE_SINT32:
+	  *args = (void*) ((char*)(raw++) + FFI_SIZEOF_ARG - 4);
+	  break;
+#endif
+	
+#if !FFI_NO_STRUCTS  
+	case FFI_TYPE_STRUCT:
+	  *args = (raw++)->ptr;
+	  break;
+#endif
+
+	case FFI_TYPE_COMPLEX:
+	  *args = (raw++)->ptr;
+	  break;
+
+	case FFI_TYPE_POINTER:
+	  *args = (void*) &(raw++)->ptr;
+	  break;
+	  
+	default:
+	  *args = raw;
+	  raw += FFI_ALIGN ((*tp)->size, FFI_SIZEOF_ARG) / FFI_SIZEOF_ARG;
+	}
+    }
+
+#else /* WORDS_BIGENDIAN */
+
+#if !PDP
+
+  /* then assume little endian */
+  for (i = 0; i < cif->nargs; i++, tp++, args++)
+    {	  
+#if !FFI_NO_STRUCTS
+      if ((*tp)->type == FFI_TYPE_STRUCT)
+	{
+	  *args = (raw++)->ptr;
+	}
+      else
+#endif
+      if ((*tp)->type == FFI_TYPE_COMPLEX)
+	{
+	  *args = (raw++)->ptr;
+	}
+      else
+	{
+	  *args = (void*) raw;
+	  raw += FFI_ALIGN ((*tp)->size, sizeof (void*)) / sizeof (void*);
+	}
+    }
+
+#else
+#error "pdp endian not supported"
+#endif /* ! PDP */
+
+#endif /* WORDS_BIGENDIAN */
+}
+
+void
+ffi_ptrarray_to_raw (ffi_cif *cif, void **args, ffi_raw *raw)
+{
+  unsigned i;
+  ffi_type **tp = cif->arg_types;
+
+  for (i = 0; i < cif->nargs; i++, tp++, args++)
+    {	  
+      switch ((*tp)->type)
+	{
+	case FFI_TYPE_UINT8:
+	  (raw++)->uint = *(UINT8*) (*args);
+	  break;
+
+	case FFI_TYPE_SINT8:
+	  (raw++)->sint = *(SINT8*) (*args);
+	  break;
+
+	case FFI_TYPE_UINT16:
+	  (raw++)->uint = *(UINT16*) (*args);
+	  break;
+
+	case FFI_TYPE_SINT16:
+	  (raw++)->sint = *(SINT16*) (*args);
+	  break;
+
+#if FFI_SIZEOF_ARG >= 4
+	case FFI_TYPE_UINT32:
+	  (raw++)->uint = *(UINT32*) (*args);
+	  break;
+
+	case FFI_TYPE_SINT32:
+	  (raw++)->sint = *(SINT32*) (*args);
+	  break;
+#endif
+
+#if !FFI_NO_STRUCTS
+	case FFI_TYPE_STRUCT:
+	  (raw++)->ptr = *args;
+	  break;
+#endif
+
+	case FFI_TYPE_COMPLEX:
+	  (raw++)->ptr = *args;
+	  break;
+
+	case FFI_TYPE_POINTER:
+	  (raw++)->ptr = **(void***) args;
+	  break;
+
+	default:
+	  memcpy ((void*) raw->data, (void*)*args, (*tp)->size);
+	  raw += FFI_ALIGN ((*tp)->size, FFI_SIZEOF_ARG) / FFI_SIZEOF_ARG;
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 	}
     }
 }

@@ -89,6 +89,7 @@ ffi_status ffi_prep_cif_machdep(ffi_cif *cif)
   /* Round the stack up to a full 4 register frame, just in case
      (we use this size in movsp). This way, it's also a  multiple of
      8 bytes for 64-bit arguments.  */
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
   cif->bytes = ALIGN(cif->bytes, 16);
 
   return FFI_OK;
@@ -206,6 +207,125 @@ void ffi_call(ffi_cif* cif, void(*fn)(void), void *rvalue, void **avalue)
   if (flags == FFI_TYPE_STRUCT && (rsize <= 16 || rvalue == NULL))
   {
     alloc = alloca(ALIGN(rsize, 4));
+=======
+  cif->bytes = FFI_ALIGN(cif->bytes, 16);
+
+  return FFI_OK;
+}
+
+void ffi_prep_args(extended_cif *ecif, unsigned char* stack)
+{
+  unsigned int i;
+  unsigned long *addr;
+  ffi_type **ptr;
+
+  union {
+    void **v;
+    char **c;
+    signed char **sc;
+    unsigned char **uc;
+    signed short **ss;
+    unsigned short **us;
+    unsigned int **i;
+    long long **ll;
+    float **f;
+    double **d;
+  } p_argv;
+
+  /* Verify that everything is aligned up properly */
+  FFI_ASSERT (((unsigned long) stack & 0x7) == 0);
+
+  p_argv.v = ecif->avalue;
+  addr = (unsigned long*)stack;
+
+  /* structures with a size greater than 16 bytes are passed in memory */
+  if (ecif->cif->rtype->type == FFI_TYPE_STRUCT && ecif->cif->rtype->size > 16)
+  {
+    *addr++ = (unsigned long)ecif->rvalue;
+  }
+
+  for (i = ecif->cif->nargs, ptr = ecif->cif->arg_types;
+       i > 0;
+       i--, ptr++, p_argv.v++)
+  {
+    switch ((*ptr)->type)
+    {
+      case FFI_TYPE_SINT8:
+        *addr++ = **p_argv.sc;
+        break;
+      case FFI_TYPE_UINT8:
+        *addr++ = **p_argv.uc;
+        break;
+      case FFI_TYPE_SINT16:
+        *addr++ = **p_argv.ss;
+        break;
+      case FFI_TYPE_UINT16:
+        *addr++ = **p_argv.us;
+        break;
+      case FFI_TYPE_FLOAT:
+      case FFI_TYPE_INT:
+      case FFI_TYPE_UINT32:
+      case FFI_TYPE_SINT32:
+      case FFI_TYPE_POINTER:
+        *addr++ = **p_argv.i;
+        break;
+      case FFI_TYPE_DOUBLE:
+      case FFI_TYPE_UINT64:
+      case FFI_TYPE_SINT64:
+        if (((unsigned long)addr & 4) != 0)
+          addr++;
+        *(unsigned long long*)addr = **p_argv.ll;
+	addr += sizeof(unsigned long long) / sizeof (addr);
+        break;
+
+      case FFI_TYPE_STRUCT:
+      {
+        unsigned long offs;
+        unsigned long size;
+
+        if (((unsigned long)addr & 4) != 0 && (*ptr)->alignment > 4)
+          addr++;
+
+        offs = (unsigned long) addr - (unsigned long) stack;
+        size = (*ptr)->size;
+
+        /* Entire structure must fit the argument registers or referenced */
+        if (offs < FFI_REGISTER_NARGS * 4
+            && offs + size > FFI_REGISTER_NARGS * 4)
+          addr = (unsigned long*) (stack + FFI_REGISTER_NARGS * 4);
+
+        memcpy((char*) addr, *p_argv.c, size);
+        addr += (size + 3) / 4;
+        break;
+      }
+
+      default:
+        FFI_ASSERT(0);
+    }
+  }
+}
+
+
+void ffi_call(ffi_cif* cif, void(*fn)(void), void *rvalue, void **avalue)
+{
+  extended_cif ecif;
+  unsigned long rsize = cif->rtype->size;
+  int flags = cif->flags;
+  void *alloc = NULL;
+
+  ecif.cif = cif;
+  ecif.avalue = avalue;
+
+  /* Note that for structures that are returned in registers (size <= 16 bytes)
+     we allocate a temporary buffer and use memcpy to copy it to the final 
+     destination. The reason is that the target address might be misaligned or
+     the length not a multiple of 4 bytes. Handling all those cases would be
+     very complex.  */
+
+  if (flags == FFI_TYPE_STRUCT && (rsize <= 16 || rvalue == NULL))
+  {
+    alloc = alloca(FFI_ALIGN(rsize, 4));
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
     ecif.rvalue = alloc;
   }
   else

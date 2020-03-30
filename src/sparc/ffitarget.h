@@ -46,6 +46,7 @@ typedef signed long            ffi_sarg;
 
 typedef enum ffi_abi {
   FFI_FIRST_ABI = 0,
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
   FFI_V8,
   FFI_V8PLUS,
   FFI_V9,
@@ -61,6 +62,31 @@ typedef enum ffi_abi {
 /* ---- Definitions for closures ----------------------------------------- */
 
 #define FFI_CLOSURES 1
+=======
+#ifdef SPARC64
+  FFI_V9,
+  FFI_DEFAULT_ABI = FFI_V9,
+#else
+  FFI_V8,
+  FFI_DEFAULT_ABI = FFI_V8,
+#endif
+  FFI_LAST_ABI
+} ffi_abi;
+#endif
+
+#define FFI_TARGET_SPECIFIC_STACK_SPACE_ALLOCATION 1
+#define FFI_TARGET_HAS_COMPLEX_TYPE 1
+
+#ifdef SPARC64
+# define FFI_TARGET_SPECIFIC_VARIADIC 1
+# define FFI_EXTRA_CIF_FIELDS  unsigned int nfixedargs
+#endif
+
+/* ---- Definitions for closures ----------------------------------------- */
+
+#define FFI_CLOSURES 1
+#define FFI_GO_CLOSURES 1
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 #define FFI_NATIVE_RAW_API 0
 
 #ifdef SPARC64

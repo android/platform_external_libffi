@@ -26,4 +26,8 @@
 #    release, then set age to 0.
 #
 # CURRENT:REVISION:AGE
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 6:4:0
+=======
+8:0:1
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)

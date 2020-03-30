@@ -19,6 +19,7 @@ libffi-init
 
 global srcdir subdir
 
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 set tlist [lsearch -inline -all -not -glob [lsort [glob -nocomplain -- $srcdir/$subdir/*.{c,cc}]] *complex*]
 set ctlist [lsearch -inline -all -glob [lsort [glob -nocomplain -- $srcdir/$subdir/*.{c,cc}]] *complex*]
 
@@ -34,6 +35,34 @@ if { ![istarget s390*] } {
 
   run-many-tests $ctlist ""
 
+=======
+if { [string match $compiler_vendor "microsoft"] } {
+    # -wd4005  macro redefinition
+    # -wd4244  implicit conversion to type of smaller size
+    # -wd4305  truncation to smaller type
+    # -wd4477  printf %lu of uintptr_t
+    # -wd4312  implicit conversion to type of greater size
+    # -wd4311  pointer truncation to unsigned long
+    # -EHsc    C++ Exception Handling (no SEH exceptions)
+    set additional_options "-wd4005 -wd4244 -wd4305 -wd4477 -wd4312 -wd4311 -EHsc";
+} else {
+    set additional_options "";
+}
+
+set tlist [lsort [glob -nocomplain -- $srcdir/$subdir/*.c]]
+
+run-many-tests $tlist $additional_options
+
+set tlist [lsort [glob -nocomplain -- $srcdir/$subdir/*.cc]]
+
+# No C++ for or1k
+if { [istarget "or1k-*-*"] } {
+    foreach test $tlist {
+        unsupported "$test"
+    }
+} else {
+    run-many-tests $tlist $additional_options
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 }
 
 dg-finish

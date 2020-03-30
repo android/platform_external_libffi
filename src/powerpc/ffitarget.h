@@ -91,6 +91,7 @@ typedef enum ffi_abi {
   /* This and following bits can reuse FFI_COMPAT values.  */
   FFI_LINUX_STRUCT_ALIGN = 1,
   FFI_LINUX_LONG_DOUBLE_128 = 2,
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
   FFI_DEFAULT_ABI = (FFI_LINUX
 #  ifdef __STRUCT_PARM_ALIGN__
 		     | FFI_LINUX_STRUCT_ALIGN
@@ -155,6 +156,93 @@ typedef enum ffi_abi {
 #define FFI_V2_TYPE_FLOAT_HOMOG		(FFI_TYPE_LAST + 1)
 #define FFI_V2_TYPE_DOUBLE_HOMOG	(FFI_TYPE_LAST + 2)
 #define FFI_V2_TYPE_SMALL_STRUCT	(FFI_TYPE_LAST + 3)
+=======
+  FFI_LINUX_LONG_DOUBLE_IEEE128 = 4,
+  FFI_DEFAULT_ABI = (FFI_LINUX
+#  ifdef __STRUCT_PARM_ALIGN__
+		     | FFI_LINUX_STRUCT_ALIGN
+#  endif
+#  ifdef __LONG_DOUBLE_128__
+		     | FFI_LINUX_LONG_DOUBLE_128
+#   ifdef __LONG_DOUBLE_IEEE128__
+		     | FFI_LINUX_LONG_DOUBLE_IEEE128
+#   endif
+#  endif
+		     ),
+  FFI_LAST_ABI = 16
+
+# else
+  /* This bit, always set in new code, must not be set in any of the
+     old FFI_COMPAT values that might be used for 32-bit linux/sysv/bsd.  */
+  FFI_SYSV = 8,
+  /* This and following bits can reuse FFI_COMPAT values.  */
+  FFI_SYSV_SOFT_FLOAT = 1,
+  FFI_SYSV_STRUCT_RET = 2,
+  FFI_SYSV_IBM_LONG_DOUBLE = 4,
+  FFI_SYSV_LONG_DOUBLE_128 = 16,
+
+  FFI_DEFAULT_ABI = (FFI_SYSV
+#  ifdef __NO_FPRS__
+		     | FFI_SYSV_SOFT_FLOAT
+#  endif
+#  if (defined (__SVR4_STRUCT_RETURN)					\
+       || defined (POWERPC_FREEBSD) && !defined (__AIX_STRUCT_RETURN))
+		     | FFI_SYSV_STRUCT_RET
+#  endif
+#  if __LDBL_MANT_DIG__ == 106
+		     | FFI_SYSV_IBM_LONG_DOUBLE
+#  endif
+#  ifdef __LONG_DOUBLE_128__
+		     | FFI_SYSV_LONG_DOUBLE_128
+#  endif
+		     ),
+  FFI_LAST_ABI = 32
+# endif
+#endif
+
+} ffi_abi;
+#endif
+
+/* ---- Definitions for closures ----------------------------------------- */
+
+#define FFI_CLOSURES 1
+#define FFI_NATIVE_RAW_API 0
+#if defined (POWERPC) || defined (POWERPC_FREEBSD)
+# define FFI_GO_CLOSURES 1
+# define FFI_TARGET_SPECIFIC_VARIADIC 1
+# define FFI_EXTRA_CIF_FIELDS unsigned nfixedargs
+#endif
+#if defined (POWERPC_AIX)
+# define FFI_GO_CLOSURES 1
+#endif
+
+/* ppc_closure.S and linux64_closure.S expect this.  */
+#define FFI_PPC_TYPE_LAST FFI_TYPE_POINTER
+
+/* We define additional types below.  If generic types are added that
+   must be supported by powerpc libffi then it is likely that
+   FFI_PPC_TYPE_LAST needs increasing *and* the jump tables in
+   ppc_closure.S and linux64_closure.S be extended.  */
+
+#if !(FFI_TYPE_LAST == FFI_PPC_TYPE_LAST		\
+      || (FFI_TYPE_LAST == FFI_TYPE_COMPLEX		\
+	  && !defined FFI_TARGET_HAS_COMPLEX_TYPE))
+# error "You likely have a broken powerpc libffi"
+#endif
+
+/* Needed for soft-float long-double-128 support.  */
+#define FFI_TYPE_UINT128 (FFI_PPC_TYPE_LAST + 1)
+
+/* Needed for FFI_SYSV small structure returns.  */
+#define FFI_SYSV_TYPE_SMALL_STRUCT (FFI_PPC_TYPE_LAST + 2)
+
+/* Used by ELFv2 for homogenous structure returns.  */
+#define FFI_V2_TYPE_VECTOR		(FFI_PPC_TYPE_LAST + 1)
+#define FFI_V2_TYPE_VECTOR_HOMOG	(FFI_PPC_TYPE_LAST + 2)
+#define FFI_V2_TYPE_FLOAT_HOMOG		(FFI_PPC_TYPE_LAST + 3)
+#define FFI_V2_TYPE_DOUBLE_HOMOG	(FFI_PPC_TYPE_LAST + 4)
+#define FFI_V2_TYPE_SMALL_STRUCT	(FFI_PPC_TYPE_LAST + 5)
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 
 #if _CALL_ELF == 2
 # define FFI_TRAMPOLINE_SIZE 32

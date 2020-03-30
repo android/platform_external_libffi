@@ -29,6 +29,7 @@
 #include <ffi.h>
 #include <ffi_common.h>
 
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 #define STACK_ARG_SIZE(x) ALIGN(x, FFI_SIZEOF_ARG)
 
 static ffi_status
@@ -191,6 +192,170 @@ ffi_prep_cif_core (ffi_cif * cif,
 
       if (((*ptr)->alignment - 1) & bytes)
 	bytes = ALIGN (bytes, (*ptr)->alignment);
+=======
+#define STACK_ARG_SIZE(x) FFI_ALIGN(x, FFI_SIZEOF_ARG)
+
+static ffi_status
+initialize_aggregate_packed_struct (ffi_type * arg)
+{
+  ffi_type **ptr;
+
+  FFI_ASSERT (arg != NULL);
+
+  FFI_ASSERT (arg->elements != NULL);
+  FFI_ASSERT (arg->size == 0);
+  FFI_ASSERT (arg->alignment == 0);
+
+  ptr = &(arg->elements[0]);
+
+  while ((*ptr) != NULL)
+    {
+      if (((*ptr)->size == 0)
+	  && (initialize_aggregate_packed_struct ((*ptr)) != FFI_OK))
+	return FFI_BAD_TYPEDEF;
+
+      FFI_ASSERT (ffi_type_test ((*ptr)));
+
+      arg->size += (*ptr)->size;
+
+      arg->alignment = (arg->alignment > (*ptr)->alignment) ?
+	arg->alignment : (*ptr)->alignment;
+
+      ptr++;
+    }
+
+  if (arg->size == 0)
+    return FFI_BAD_TYPEDEF;
+  else
+    return FFI_OK;
+}
+
+int
+ffi_prep_args (char *stack, extended_cif * ecif)
+{
+  unsigned int i;
+  unsigned int struct_count = 0;
+  void **p_argv;
+  char *argp;
+  ffi_type **p_arg;
+
+  argp = stack;
+
+  p_argv = ecif->avalue;
+
+  for (i = ecif->cif->nargs, p_arg = ecif->cif->arg_types;
+       (i != 0); i--, p_arg++)
+    {
+      size_t z;
+
+      switch ((*p_arg)->type)
+	{
+	case FFI_TYPE_STRUCT:
+	  {
+	    z = (*p_arg)->size;
+	    if (z <= 4)
+	      {
+		memcpy (argp, *p_argv, z);
+		z = 4;
+	      }
+	    else if (z <= 8)
+	      {
+		memcpy (argp, *p_argv, z);
+		z = 8;
+	      }
+	    else
+	      {
+		unsigned int uiLocOnStack;
+		z = sizeof (void *);
+		uiLocOnStack = 4 * ecif->cif->nargs + struct_count;
+		struct_count = struct_count + (*p_arg)->size;
+		*(unsigned int *) argp =
+		  (unsigned int) (UINT32 *) (stack + uiLocOnStack);
+		memcpy ((stack + uiLocOnStack), *p_argv, (*p_arg)->size);
+	      }
+	    break;
+	  }
+	default:
+	  z = (*p_arg)->size;
+	  if (z < sizeof (int))
+	    {
+	      switch ((*p_arg)->type)
+		{
+		case FFI_TYPE_SINT8:
+		  *(signed int *) argp = (signed int) *(SINT8 *) (*p_argv);
+		  break;
+
+		case FFI_TYPE_UINT8:
+		  *(unsigned int *) argp =
+		    (unsigned int) *(UINT8 *) (*p_argv);
+		  break;
+
+		case FFI_TYPE_SINT16:
+		  *(signed int *) argp = (signed int) *(SINT16 *) (*p_argv);
+		  break;
+
+		case FFI_TYPE_UINT16:
+		  *(unsigned int *) argp =
+		    (unsigned int) *(UINT16 *) (*p_argv);
+		  break;
+
+		default:
+		  FFI_ASSERT (0);
+		}
+	      z = sizeof (int);
+	    }
+	  else if (z == sizeof (int))
+	    *(unsigned int *) argp = (unsigned int) *(UINT32 *) (*p_argv);
+	  else
+	    memcpy (argp, *p_argv, z);
+	  break;
+	}
+      p_argv++;
+      argp += z;
+    }
+
+  return (struct_count);
+}
+
+ffi_status FFI_HIDDEN
+ffi_prep_cif_core (ffi_cif * cif,
+	           ffi_abi abi, unsigned int isvariadic,
+		   unsigned int nfixedargs, unsigned int ntotalargs,
+	           ffi_type * rtype, ffi_type ** atypes)
+{
+  unsigned bytes = 0;
+  unsigned int i;
+  ffi_type **ptr;
+
+  FFI_ASSERT (cif != NULL);
+  FFI_ASSERT((!isvariadic) || (nfixedargs >= 1));
+  FFI_ASSERT(nfixedargs <= ntotalargs);
+  FFI_ASSERT (abi > FFI_FIRST_ABI && abi < FFI_LAST_ABI);
+
+  cif->abi = abi;
+  cif->arg_types = atypes;
+  cif->nargs = ntotalargs;
+  cif->rtype = rtype;
+
+  cif->flags = 0;
+
+  if ((cif->rtype->size == 0)
+      && (initialize_aggregate_packed_struct (cif->rtype) != FFI_OK))
+    return FFI_BAD_TYPEDEF;
+
+  FFI_ASSERT_VALID_TYPE (cif->rtype);
+
+  for (ptr = cif->arg_types, i = cif->nargs; i > 0; i--, ptr++)
+    {
+      if (((*ptr)->size == 0)
+	  && (initialize_aggregate_packed_struct ((*ptr)) != FFI_OK))
+	return FFI_BAD_TYPEDEF;
+
+      FFI_ASSERT_VALID_TYPE (*ptr);
+
+      if (((*ptr)->alignment - 1) & bytes)
+	bytes = FFI_ALIGN (bytes, (*ptr)->alignment);
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
       if ((*ptr)->type == FFI_TYPE_STRUCT)
 	{
 	  if ((*ptr)->size > 8)

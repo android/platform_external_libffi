@@ -353,6 +353,7 @@ Lret_type13:
 	bgt	Lstructend		; not a special small case
 	b	Lsmallstruct		; see if we need more.
 #else
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 	cmpi	0,r0,4
 	bgt	Lfinish		; not by value
 	lg	r3,0(r5)
@@ -496,6 +497,151 @@ LASFDE1:
 	.g_long	Lstartcode-.	; FDE initial location
 	.set	L$set$3,LFE1-Lstartcode
 	.g_long	L$set$3	; FDE address range
+=======
+	cmpwi	0,r0,4
+	bgt	Lfinish		; not by value
+	lg	r3,0(r5)
+	b	Lfinish
+#endif
+/* case FFI_TYPE_POINTER  */
+Lret_type14:
+	lg	r3,0(r5)
+	b	Lfinish
+	nop
+	nop
+
+#if defined(__ppc64__)
+Lsmallstruct:
+	beq	Lfour			; continuation of Lret13.
+	cmpi	0,r0,3
+	beq	Lfinish			; don`t adjust this - can`t be any floats here...
+	srdi	r3,r3,48
+	cmpi	0,r0,2
+	beq	Lfinish			; .. or here ..
+	srdi	r3,r3,8
+	b 	Lfinish			; .. or here.
+
+Lfour:
+	lg	r6,LINKAGE_SIZE(r1)	; get the result type
+	lg	r6,FFI_TYPE_ELEM(r6)	; elements array pointer
+	lg	r6,0(r6)		; first element
+	lhz	r0,FFI_TYPE_TYPE(r6)	; OK go the type
+	cmpi	0,r0,2			; FFI_TYPE_FLOAT
+	bne	Lfourint
+	lfs	f1,0(r5)		; just one float in the struct.
+	b 	Lfinish
+
+Lfourint:
+	srdi	r3,r3,32		; four bytes.
+	b 	Lfinish
+
+Lstructend:
+	lg	r3,LINKAGE_SIZE(r1)	; get the result type
+	bl	STRUCT_RETVALUE_P
+	cmpi	0,r3,0
+	beq	Lfinish			; nope.
+	/* Recover a pointer to the results.  */
+	addi	r11,r1,(SAVE_SIZE-RESULT_BYTES)
+	lg	r3,0(r11)		; we need at least this...
+	lg	r4,8(r11)
+	cmpi	0,r0,16
+	beq	Lfinish		; special case 16 bytes we don't consider floats.
+
+	/* OK, frustratingly, the process of saving the struct to mem might have
+	   messed with the FPRs, so we have to re-load them :(.
+	   We`ll use our FPRs space again - calling: 
+	   void darwin64_pass_struct_floats (ffi_type *s, char *src, 
+					     unsigned *nfpr, double **fprs) 
+	   We`ll temporarily pinch the first two slots of the param area for local
+	   vars used by the routine.  */
+	xor	r6,r6,r6
+	addi	r5,r1,PARENT_PARM_BASE		; some space
+	sg	r6,0(r5)			; *nfpr zeroed.
+	addi	r6,r5,8				; **fprs
+	addi	r3,r1,FP_SAVE_BASE		; pointer to FPRs space
+	sg	r3,0(r6)
+	mr	r4,r11				; the struct is here...
+	lg	r3,LINKAGE_SIZE(r1)		; ffi_type * result_type.
+	bl	PASS_STR_FLOATS			; get struct floats into FPR save space.
+	/* See if we used any floats  */
+	lwz	r0,(SAVE_SIZE-RESULT_BYTES)(r1)	
+	cmpi	0,r0,0
+	beq	Lstructints			; nope.
+	/* OK load `em up... */
+	lfd	f1, (FP_SAVE_BASE                 )(r1)
+	lfd	f2, (FP_SAVE_BASE +  FPR_SIZE     )(r1)
+	lfd	f3, (FP_SAVE_BASE +  FPR_SIZE * 2 )(r1)
+	lfd	f4, (FP_SAVE_BASE +  FPR_SIZE * 3 )(r1)
+	lfd	f5, (FP_SAVE_BASE +  FPR_SIZE * 4 )(r1)
+	lfd	f6, (FP_SAVE_BASE +  FPR_SIZE * 5 )(r1)
+	lfd	f7, (FP_SAVE_BASE +  FPR_SIZE * 6 )(r1)
+	lfd	f8, (FP_SAVE_BASE +  FPR_SIZE * 7 )(r1)
+	lfd	f9, (FP_SAVE_BASE +  FPR_SIZE * 8 )(r1)
+	lfd	f10,(FP_SAVE_BASE +  FPR_SIZE * 9 )(r1)
+	lfd	f11,(FP_SAVE_BASE +  FPR_SIZE * 10)(r1)
+	lfd	f12,(FP_SAVE_BASE +  FPR_SIZE * 11)(r1)
+	lfd	f13,(FP_SAVE_BASE +  FPR_SIZE * 12)(r1)
+
+	/* point back at our saved struct.  */
+Lstructints:
+	addi	r11,r1,(SAVE_SIZE-RESULT_BYTES)
+	lg	r3,0(r11)			; we end up picking the
+	lg	r4,8(r11)			; first two again.
+	lg	r5,16(r11)
+	lg	r6,24(r11)
+	lg	r7,32(r11)
+	lg	r8,40(r11)
+	lg	r9,48(r11)
+	lg	r10,56(r11)
+#endif
+
+/* case done  */
+Lfinish:
+	addi	r1,r1,SAVE_SIZE		/* Restore stack pointer.  */
+	lg	r0,SAVED_LR_OFFSET(r1)	/* Get return address.  */
+	mtlr	r0			/* Reset link register.  */
+	blr
+Lendcode:
+	.align 1
+	
+/* END(ffi_closure_ASM)  */
+
+/* EH frame stuff.  */
+#define EH_DATA_ALIGN_FACT MODE_CHOICE(0x7c,0x78)
+/* 176, 400 */
+#define EH_FRAME_OFFSETA MODE_CHOICE(176,0x90)
+#define EH_FRAME_OFFSETB MODE_CHOICE(1,3)
+
+	.section __TEXT,__eh_frame,coalesced,no_toc+strip_static_syms+live_support
+EH_frame1:
+	.set	L$set$0,LECIE1-LSCIE1
+	.long	L$set$0	; Length of Common Information Entry
+LSCIE1:
+	.long	0x0	; CIE Identifier Tag
+	.byte	0x1	; CIE Version
+	.ascii	"zR\0"	; CIE Augmentation
+	.byte	0x1	; uleb128 0x1; CIE Code Alignment Factor
+	.byte	EH_DATA_ALIGN_FACT ; sleb128 -4; CIE Data Alignment Factor
+	.byte	0x41	; CIE RA Column
+	.byte	0x1	; uleb128 0x1; Augmentation size
+	.byte	0x10	; FDE Encoding (pcrel)
+	.byte	0xc	; DW_CFA_def_cfa
+	.byte	0x1	; uleb128 0x1
+	.byte	0x0	; uleb128 0x0
+	.align	LOG2_GPR_BYTES
+LECIE1:
+	.globl _ffi_closure_ASM.eh
+_ffi_closure_ASM.eh:
+LSFDE1:
+	.set	L$set$1,LEFDE1-LASFDE1
+	.long	L$set$1	; FDE Length
+
+LASFDE1:
+	.long	LASFDE1-EH_frame1	; FDE CIE offset
+	.g_long	Lstartcode-.	; FDE initial location
+	.set	L$set$2,LFE1-Lstartcode
+	.g_long	L$set$2	; FDE address range
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 	.byte   0x0     ; uleb128 0x0; Augmentation size
 	.byte	0x4	; DW_CFA_advance_loc4
 	.set	L$set$3,LCFI1-LCFI0

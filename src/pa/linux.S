@@ -297,6 +297,7 @@ ffi_closure_pa32:
 .LSCIE1:
 	.word   0x0     ;# CIE Identifier Tag
 	.byte   0x1     ;# CIE Version
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 	.ascii "\0"     ;# CIE Augmentation
 	.uleb128 0x1    ;# CIE Code Alignment Factor
 	.sleb128 4      ;# CIE Data Alignment Factor
@@ -340,6 +341,72 @@ ffi_closure_pa32:
 	.word   .LASFDE2-.Lframe1       ;# FDE CIE offset
 	.word   .LFB2   ;# FDE initial location
 	.word   .LFE2-.LFB2     ;# FDE address range
+=======
+#ifdef __PIC__
+	.ascii  "zR\0"  ;# CIE Augmentation: 'z' - data, 'R' - DW_EH_PE_... data
+#else
+	.ascii "\0"     ;# CIE Augmentation
+#endif
+	.uleb128 0x1    ;# CIE Code Alignment Factor
+	.sleb128 4      ;# CIE Data Alignment Factor
+	.byte   0x2     ;# CIE RA Column
+#ifdef __PIC__
+	.uleb128 0x1    ;# Augmentation size
+	.byte	0x1b    ;# FDE Encoding (DW_EH_PE_pcrel|DW_EH_PE_sdata4)
+#endif
+	.byte   0xc     ;# DW_CFA_def_cfa
+	.uleb128 0x1e
+	.uleb128 0x0
+	.align 4
+.LECIE1:
+.LSFDE1:
+	.word   .LEFDE1-.LASFDE1        ;# FDE Length
+.LASFDE1:
+	.word   .LASFDE1-.Lframe1       ;# FDE CIE offset
+#ifdef __PIC__
+	.word	.LFB1-. ;# FDE initial location
+#else
+	.word	.LFB1   ;# FDE initial location
+#endif
+	.word   .LFE1-.LFB1     ;# FDE address range
+#ifdef __PIC__
+	.uleb128 0x0	;# Augmentation size: no data
+#endif
+	.byte   0x4     ;# DW_CFA_advance_loc4
+	.word   .LCFI11-.LFB1
+	.byte	0x83	;# DW_CFA_offset, column 0x3
+	.uleb128 0x0
+	.byte   0x11    ;# DW_CFA_offset_extended_sf; save r2 at [r30-20]
+	.uleb128 0x2
+	.sleb128 -5
+
+	.byte   0x4     ;# DW_CFA_advance_loc4
+	.word   .LCFI12-.LCFI11
+	.byte   0xd     ;# DW_CFA_def_cfa_register = r3
+	.uleb128 0x3
+
+	.byte   0x4     ;# DW_CFA_advance_loc4
+	.word   .LCFI13-.LCFI12
+	.byte	0x84	;# DW_CFA_offset, column 0x4
+	.uleb128 0x3
+
+	.align 4
+.LEFDE1:
+
+.LSFDE2:
+	.word   .LEFDE2-.LASFDE2        ;# FDE Length
+.LASFDE2:
+	.word   .LASFDE2-.Lframe1       ;# FDE CIE offset
+#ifdef __PIC__
+	.word   .LFB2-. ;# FDE initial location
+#else
+	.word   .LFB2   ;# FDE initial location
+#endif
+	.word   .LFE2-.LFB2     ;# FDE address range
+#ifdef __PIC__
+	.uleb128 0x0	;# Augmentation size: no data
+#endif
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 	.byte   0x4     ;# DW_CFA_advance_loc4
 	.word   .LCFI21-.LFB2
 	.byte   0x83    ;# DW_CFA_offset, column 0x3

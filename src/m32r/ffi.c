@@ -61,7 +61,11 @@ void ffi_prep_args(char *stack, extended_cif *ecif)
 
       /* Align if necessary.  */
       if (((*p_arg)->alignment - 1) & (unsigned) argp)
+<<<<<<< HEAD   (1246a0 Merge "Remove redundant NOTICE copied from LICENSE.")
 	argp = (char *) ALIGN (argp, (*p_arg)->alignment);
+=======
+	argp = (char *) FFI_ALIGN (argp, (*p_arg)->alignment);
+>>>>>>> BRANCH (5dcb74 Move nested_struct3 test to closures directory)
 
       if (avn != 0) 
 	{
