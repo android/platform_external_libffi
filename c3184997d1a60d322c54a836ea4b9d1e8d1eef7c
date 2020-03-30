@@ -1,0 +1,9 @@
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Autosubmit+1: Elliott Hughes <enh@google.com>
+Code-Review+2: Haibo Huang <hhb@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Mon, 30 Mar 2020 20:10:24 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/libffi/+/1269424
+Project: platform/external/libffi
+Branch: refs/heads/master
