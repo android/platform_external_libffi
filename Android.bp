@@ -27,8 +27,12 @@ cc_library_static {
     cflags: [
         "-Wall",
         "-Werror",
+
         "-Wno-error=incompatible-pointer-types",
         "-Wno-incompatible-pointer-types",
+
+        "-Wno-deprecated-declarations",
+        "-Wno-missing-field-initializers",
         "-Wno-null-pointer-arithmetic",
         "-Wno-pointer-arith",
         "-Wno-sign-compare",
@@ -76,22 +80,15 @@ cc_library_static {
         x86_64: {
             srcs: [
                 "src/x86/ffi64.c",
+                "src/x86/ffiw64.c",
                 "src/x86/unix64.S",
+                "src/x86/win64.S",
             ],
             asflags: [
                 "-DHAVE_AS_X86_PCREL",
                 "-DHAVE_AS_ASCII_PSEUDO_OP",
             ],
             export_include_dirs: ["linux-x86_64"],
-        },
-    },
-    target: {
-        darwin_x86_64: {
-            exclude_srcs: ["src/x86/unix64.S"],
-            srcs: [
-                "src/x86/darwin.S",
-                "src/x86/darwin64.S",
-            ],
         },
     },
 }
