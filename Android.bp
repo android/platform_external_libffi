@@ -91,13 +91,4 @@ cc_library_static {
             export_include_dirs: ["linux-x86_64"],
         },
     },
-    target: {
-        darwin_x86_64: {
-            exclude_srcs: ["src/x86/unix64.S"],
-            srcs: [
-                "src/x86/darwin.S",
-                "src/x86/darwin64.S",
-            ],
-        },
-    },
 }
