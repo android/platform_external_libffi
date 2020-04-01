@@ -1,0 +1,8 @@
+Autosubmit+1: Dan Willemsen <dwillemsen@google.com>
+Code-Review+2: Elliott Hughes <enh@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Wed, 01 Apr 2020 03:00:26 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/libffi/+/1275316
+Project: platform/external/libffi
+Branch: refs/heads/master
