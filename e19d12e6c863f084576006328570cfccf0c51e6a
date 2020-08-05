@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79c4a1ee_25727de0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2020-08-05T01:49:05Z",
+      "side": 1,
+      "message": "I realize that this may not ultimately work, as I\u0027m not sure every symbol is still present, but I don\u0027t know what other configs are still using this. Let\u0027s see what TH says, and I can launch x86 builds if needed too.",
+      "revId": "e19d12e6c863f084576006328570cfccf0c51e6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
