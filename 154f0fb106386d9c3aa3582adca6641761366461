@@ -1,0 +1,8 @@
+Autosubmit+1: Stephen Hines <srhines@google.com>
+Presubmit-Ready+1: Stephen Hines <srhines@google.com>
+Build-Cop-Override+1: Chiachang Wang <chiachangwang@google.com>
+Submitted-by: Chiachang Wang <chiachangwang@google.com>
+Submitted-at: Wed, 05 Aug 2020 06:05:18 +0000
+Reviewed-on: https://android-review.googlesource.com/c/platform/external/libffi/+/1389557
+Project: platform/external/libffi
+Branch: refs/heads/master
