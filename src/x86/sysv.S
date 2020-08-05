@@ -797,7 +797,7 @@ ENDF(C(ffi_closure_raw_THISCALL))
         FFI_HIDDEN(X)
 #elif defined __ELF__ && !(defined(__sun__) && defined(__svr4__))
 # define COMDAT(X)							\
-	.section .text.X,"axG",@progbits,X,comdat;			\
+	.text
 	.globl	X;							\
 	FFI_HIDDEN(X)
 #else
