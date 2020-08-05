@@ -20,7 +20,7 @@ genrule {
     tool_files: ["gen_ffi_header.sh"],
 }
 
-cc_library {
+cc_library_static {
     name: "libffi",
     host_supported: true,
     vendor_available: true,
@@ -69,6 +69,7 @@ cc_library {
             srcs: [
                 "src/x86/ffi.c",
                 "src/x86/sysv.S",
+                "src/x86/win32.S",
             ],
             asflags: [
                 "-DHAVE_AS_X86_PCREL",
