@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "718e2fd2_0ea604c8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2020-08-05T18:41:04Z",
+      "side": 1,
+      "message": "Let\u0027s get this much checked in, even though it still doesn\u0027t work as a dynamic shared library for x86. This at least fixes the build break and removes the unnecessary file (which breaks in other ways if we try to build a shared lib).",
+      "revId": "b92f8f9b8fad992bc9d38392715a7b2b7bd46f3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
