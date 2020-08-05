@@ -20,7 +20,7 @@ genrule {
     tool_files: ["gen_ffi_header.sh"],
 }
 
-cc_library_static {
+cc_library {
     name: "libffi",
     host_supported: true,
     vendor_available: true,
