@@ -16,6 +16,23 @@
       "revId": "e19d12e6c863f084576006328570cfccf0c51e6a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a9b0cf4c_b87fa9e0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003224
+      },
+      "writtenOn": "2020-08-05T02:40:51Z",
+      "side": 1,
+      "message": "while you have a copy of upstream... are there any other files we have that are no longer in upstream? (if so, please file a bug for me/hhb to come back and clean them up too.)",
+      "revId": "e19d12e6c863f084576006328570cfccf0c51e6a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
