@@ -16,6 +16,23 @@
       "revId": "bfe9c0a518e707767a63b116b7ec621addb0ceb7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0facff7b_37b45b2e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2020-08-06T00:50:06Z",
+      "side": 1,
+      "message": "The presubmit results show:\n\nld.lld: error: duplicate symbol: ffi_closure_REGISTER\n\u003e\u003e\u003e defined at sysv.S:451 (external/libffi/src/x86/sysv.S:451)\n\u003e\u003e\u003e            out/soong/.intermediates/external/libffi/libffi/linux_glibc_x86_static/obj/external/libffi/src/x86/sysv.o:(ffi_closure_REGISTER)\n\u003e\u003e\u003e defined at win32.S:747 (external/libffi/src/x86/win32.S:747)\n\u003e\u003e\u003e            out/soong/.intermediates/external/libffi/libffi/linux_glibc_x86_static/obj/external/libffi/src/x86/win32.o:(.text+0x13E)\n\nUgh, still not far enough on the internal build (6739682) to have this CL. One more time with TH.",
+      "revId": "bfe9c0a518e707767a63b116b7ec621addb0ceb7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
