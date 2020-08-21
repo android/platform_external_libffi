@@ -33,6 +33,24 @@
       "revId": "480af4adb72f4e77ca451ba236e87fd155fee805",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ac0c8b26_73bfa5d4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2020-08-21T15:29:55Z",
+      "side": 1,
+      "message": "They do get it right. I confirmed that if I run their steps manually myself, I get that Clang produces readonly sections. I didn\u0027t try running `configure` itself, as there aren\u0027t really good instructions about how it was/is generated. Should I extend http://b/162902913 or file a separate bug about establishing a way for people to re-run configure using Android\u0027s setup?",
+      "parentUuid": "eba18522_21637a8e",
+      "revId": "480af4adb72f4e77ca451ba236e87fd155fee805",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
