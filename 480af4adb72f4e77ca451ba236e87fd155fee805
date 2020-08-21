@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5fc62ab8_9ca2a2e3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2020-08-21T01:31:32Z",
+      "side": 1,
+      "message": "Burned by fixing the libffi x86 issues with the old compiler, and yet another change makes it not work with the new compiler. LOL",
+      "revId": "480af4adb72f4e77ca451ba236e87fd155fee805",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
