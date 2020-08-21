@@ -16,6 +16,23 @@
       "revId": "480af4adb72f4e77ca451ba236e87fd155fee805",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eba18522_21637a8e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003224
+      },
+      "writtenOn": "2020-08-21T15:25:45Z",
+      "side": 1,
+      "message": "does the upstream configure script get this right? (i\u0027m just wondering if there\u0027s something we need to report upstream...)",
+      "revId": "480af4adb72f4e77ca451ba236e87fd155fee805",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
