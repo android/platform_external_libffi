@@ -51,6 +51,24 @@
       "revId": "480af4adb72f4e77ca451ba236e87fd155fee805",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "26afb24a_3639db7f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003224
+      },
+      "writtenOn": "2020-08-21T15:45:25Z",
+      "side": 1,
+      "message": "i think hhb@ already has a bug, since it\u0027s the most obvious remaining gap for the [semi-]automatic updater. it\u0027s tricky though, and i suspect the best way to get started is to just have a hook .sh file that we run, see how many of those we can actually get working, and then work out their commonalities.\n\nfor example, i\u0027m most familiar with strace, which is an absolute fucking nightmare and i think just inherently broken for us (unless we switch to a more ChromeOS-like build and actually run configure!).\n\nlibffi is a simpler variant of that --- does need to be run N times, but at least doesn\u0027t require you to build  intermediate binaries and run awk and use headers from the wrong arch and...\n\nmksh is easy but totally custom. likewise toybox.\n\nhhb@ has a sort-of-working script for curl (which would probably graduate to \"working\" if it was able to just say \"current clang please\" rather than hard-coding a revision).\n\nso, yeah, it\u0027s an \"obvious\" next step, but it\u0027s very much not obvious (to me at least) how to break it down into doable pieces!",
+      "parentUuid": "ac0c8b26_73bfa5d4",
+      "revId": "480af4adb72f4e77ca451ba236e87fd155fee805",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
