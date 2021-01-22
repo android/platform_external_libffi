@@ -94,4 +94,5 @@ cc_library {
         "//apex_available:platform",
         "com.android.virt",
     ],
+    min_sdk_version: "S",
 }
