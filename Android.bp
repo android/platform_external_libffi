@@ -90,4 +90,8 @@ cc_library {
             export_include_dirs: ["linux-x86_64"],
         },
     },
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.virt",
+    ],
 }
