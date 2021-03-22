@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "adb5c1d6_8fd8fe74",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1003224
+      },
+      "writtenOn": "2021-03-22T16:08:01Z",
+      "side": 1,
+      "message": "seems like that\u0027s also in compiler-rt already? (https://source.corp.google.com/android/external/compiler-rt/lib/builtins/clear_cache.c;l\u003d96?q\u003d__clear_cache\u0026sq\u003dpackage:%5Eandroid$)",
+      "revId": "f79c56c80edde4379c4e5f8c7884a79730f66dc6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
