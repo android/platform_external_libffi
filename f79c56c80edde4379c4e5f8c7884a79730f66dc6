@@ -16,6 +16,24 @@
       "message": "seems like that\u0027s also in compiler-rt already? (https://source.corp.google.com/android/external/compiler-rt/lib/builtins/clear_cache.c;l\u003d96?q\u003d__clear_cache\u0026sq\u003dpackage:%5Eandroid$)",
       "revId": "f79c56c80edde4379c4e5f8c7884a79730f66dc6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "12cb0b82_4a34019d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2021-03-22T18:12:04Z",
+      "side": 1,
+      "message": "`external/compiler-rt` is the renderscript one. You need to depend on libclang_rt. https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+/refs/heads/master/Android.bp#125 is the kind of prebuilt you want to link against, although Android should that by default for C/C++ link steps (to get the right prebuilt per-device).",
+      "parentUuid": "adb5c1d6_8fd8fe74",
+      "revId": "f79c56c80edde4379c4e5f8c7884a79730f66dc6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
     }
   ]
 }
