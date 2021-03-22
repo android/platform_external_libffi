@@ -99,6 +99,7 @@ cc_library {
                 "src/arm/sysv.S",
                 "src/arm/ffi.c",
             ],
+	    static_libs: ["libgcc"],
             export_include_dirs: ["linux-arm"],
         },
         arm64: {
@@ -106,6 +107,7 @@ cc_library {
                 "src/aarch64/sysv.S",
                 "src/aarch64/ffi.c",
             ],
+	    static_libs: ["libgcc"],
             export_include_dirs: ["linux-arm64"],
         },
         x86: {
